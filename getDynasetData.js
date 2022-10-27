@@ -30,11 +30,11 @@ const init = async() => {
 
     // console.log(await dyn_btc_contract.methods.getTokenAmounts().call())
 
-    // const results = await dyn_btc_contract.getPastEvents(
-    //     'Swap',
-    //     options,
-    // );
-    // console.log(results);
+    const results = await dyn_btc_contract.getPastEvents(
+        'Swap',
+        options,
+    );
+    console.log(results);
 
 
     async function blockToDate(blockNumber) {
@@ -46,28 +46,28 @@ const init = async() => {
 
     // dyn_btc_contract.events.Swap(options)
     //     .on('data',async event => {
-    //         let tokenIn = event.tokenIn;
-    //         let tokenOut = event.tokenOut;
-    //         let amountIn = event.amountIn;
-    //         let amountOutMin = event.amountOutMin;
+    //         let tokenIn = JSON.stringify(event.returnValues.tokenIn); // A VOIR NOMBRE DE DECIMALES POUR CONVERSION (wbtc et usdc weth decimales differentes ==> faire fonction)
+    //         let tokenOut = JSON.stringify(event.returnValues.tokenOut);
+    //         let amountIn = JSON.stringify(event.returnValues.amountIn);
+    //         let amountOutMin = JSON.stringify(event.returnValues.amountOutMin);
     //         let time = await blockToDate(event.blockNumber);
     //         console.log(`Swap effectué entre ${tokenIn} et ${tokenOut}, d'un montant de ${amountIn}${tokenIn} pour un minimum reçu de ${amountOutMin}${tokenOut} à ${time}`);
     //     }
     // );
     
     
-    usdt_contract.events.Transfer(options)
-        .on('connected',str => console.log(str))
-        .on('data', async event => {
-            let from = JSON.stringify(event.returnValues.from);
-            let to = JSON.stringify(event.returnValues.to);
-            let value = JSON.stringify(event.returnValues.value/1000000);
-            let time = await blockToDate(event.blockNumber);
-            let text = `transfert USDT from ${from} to ${to} d'une valeur de ${value} USDT à ${time}`;
-            console.log(text);
-            // console.log(event);
-        }
-    );
+    // usdt_contract.events.Transfer(options)
+    //     .on('connected',str => console.log(str))
+    //     .on('data', async event => {
+    //         let from = JSON.stringify(event.returnValues.from);
+    //         let to = JSON.stringify(event.returnValues.to);
+    //         let value = JSON.stringify(event.returnValues.value/1000000);
+    //         let time = await blockToDate(event.blockNumber);
+    //         let text = `transfert USDT from ${from} to ${to} d'une valeur de ${value} USDT à ${time}`;
+    //         console.log(text);
+    //         // console.log(event);
+    //     }
+    // );
  
 };
 init();
