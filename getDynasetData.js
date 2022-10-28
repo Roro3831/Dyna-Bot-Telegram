@@ -3,7 +3,7 @@ const Web3 = require("web3");
 const BTC_ABI = require("./dynaset_BTC_ABI.json");
 const ETH_ABI = require("./dynaset_ETH_ABI.json");
 require("dotenv").config();
-
+const fetch = require('node-fetch'); // mandatory with nodeJS to work with fetch()
 
 const RPC_URL = `wss://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_ID}`;
 const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -21,9 +21,16 @@ const WBTC_INFO = ["0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",8];
 const WETH_INFO = ["0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",18];
 
 const id_chat = "-1001772396973";
+const urlEthPriceApi = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
+const urlWbtcPriceApi = "";
 
 const init = async() => {
-    
+
+    let nameToken1;
+    let nameToken2;
+    let balanceToken1;
+    let balanceToken2;
+
     const dyn_btc_contract = new web3.eth.Contract(BTC_ABI,BTC_DYN_ADDRESS);
     const dyn_eth_contract = new web3.eth.Contract(ETH_ABI,ETH_DYN_ADDRESS);
     
@@ -46,6 +53,15 @@ const init = async() => {
         else{
             return `unknown token, at address : ${addressOfToken}`
         }
+    }
+
+    async function getPrice(url) {
+        let response = await fetch(url);
+        response = response.json();
+    }
+
+    function calculRatio(){
+
     }
     
     function formatDecimals(amount,token_name){ // parse par 3 les amounts ++ pas aller trop loin après la virgule (pour weth)
@@ -71,9 +87,20 @@ const init = async() => {
         return date.toUTCString();
     }
 
+    async function getBalancesContract(dyna){
+        const balances = await dyna.methods.getTokenAmounts().call()
+        const nameToken1 = getName(balances[0][0]);
+        const nameToken2 = getName(balances[0][1]);
+        const balanceToken1 = formatDecimals(balances[1][0],nameToken1);
+        const balanceToken2 = formatDecimals(balances[1][1],nameToken2);
+        return [nameToken1,nameToken2,balanceToken1,balanceToken2];
+    }
+
+
+
     bot.sendMessage(id_chat,"Bot connected");     // rajouter commande du bot !tvl_eth !tvl_btc OU l'ajouter dans le message du bot
 
-    async function getDynaData(dyna) { // faire proportion des assets dans dynasets (ie : USDC (70%) ETH (30%))
+    async function getDynaData(dyna) { 
         dyna.events.Swap(options)
         .on('data',async event => {
             const name = await dyna.methods.name().call();
@@ -82,16 +109,14 @@ const init = async() => {
             const amountIn = formatDecimals(event.returnValues.amountIn, tokenIn);
             const amountOutMin = formatDecimals(event.returnValues.amountOutMin, tokenOut);
             const time = await blockToDate(event.blockNumber);
-            const balances = await dyna.methods.getTokenAmounts().call()
-            const nameToken1 = getName(balances[0][0]);
-            const nameToken2 = getName(balances[0][1]);
-            const balanceToken1 = formatDecimals(balances[1][0],nameToken1);
-            const balanceToken2 = formatDecimals(balances[1][1],nameToken2);
-            console.log(balances[0][0],balances[1][0]);
-            //  afficher solde total avec getTotalAmount
-            const message = `🚨 🚨 New swap detected 🚨 🚨\n\n${name}:\nSwap ${amountIn} ${tokenIn} for\n${amountOutMin} ${tokenOut}\n\n${name} assets:\n  ${balanceToken1} ${nameToken1}\n  ${balanceToken2} ${nameToken2}\n\n${time}`;
+
+            [nameToken1,nameToken2,balanceToken1,balanceToken2] = await getBalancesContract(dyna);
+            // faire ratio + afficher TVL (dans commande ?)
+
+            const message = `🚨 🚨 New swap detected 🚨 🚨\n\n${name}:\nSwap ${amountIn} ${tokenIn} for\n${amountOutMin} ${tokenOut}\n\n${name} TVL : ${tvl} $\nAssets:\n  ${balanceToken1} ${nameToken1} (${ratio1}%)\n  ${balanceToken2} ${nameToken2} (${ratio2}%)\n\n${time}`;
             console.log(message);
             bot.sendMessage(id_chat, message);
+
         } );
     }
    
