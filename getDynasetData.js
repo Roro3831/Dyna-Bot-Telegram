@@ -48,16 +48,16 @@ const init = async() => {
         }
     }
     
-    function formatDecimals(amount,token_name){
+    function formatDecimals(amount,token_name){ // parse par 3 les amounts ++ pas aller trop loin après la virgule (pour weth)
         amount = parseInt(amount);
         if (token_name === 'USDC'){
-            return amount / 10**USDC_INFO[1]
+            return (amount / 10**USDC_INFO[1]).toFixed(2);
         }
         if (token_name === 'WBTC'){
-            return amount / 10**WBTC_INFO[1]
+            return (amount / 10**WBTC_INFO[1]).toFixed(8);
         }
         if (token_name === 'WETH'){
-            return amount / 10**WETH_INFO[1]
+            return (amount / 10**WETH_INFO[1]).toFixed(8);
         }
         else {
             return `${amount}, decimals unknown`
@@ -71,9 +71,9 @@ const init = async() => {
         return date.toUTCString();
     }
 
-    bot.sendMessage(id_chat,"Bot connected");    
+    bot.sendMessage(id_chat,"Bot connected");     // rajouter commande du bot !tvl_eth !tvl_btc OU l'ajouter dans le message du bot
 
-    async function getDynaData(dyna) {
+    async function getDynaData(dyna) { // faire proportion des assets dans dynasets (ie : USDC (70%) ETH (30%))
         dyna.events.Swap(options)
         .on('data',async event => {
             const name = await dyna.methods.name().call();
@@ -82,8 +82,14 @@ const init = async() => {
             const amountIn = formatDecimals(event.returnValues.amountIn, tokenIn);
             const amountOutMin = formatDecimals(event.returnValues.amountOutMin, tokenOut);
             const time = await blockToDate(event.blockNumber);
+            const balances = await dyna.methods.getTokenAmounts().call()
+            const nameToken1 = getName(balances[0][0]);
+            const nameToken2 = getName(balances[0][1]);
+            const balanceToken1 = formatDecimals(balances[1][0],nameToken1);
+            const balanceToken2 = formatDecimals(balances[1][1],nameToken2);
+            console.log(balances[0][0],balances[1][0]);
             //  afficher solde total avec getTotalAmount
-            const message = `New swap detected !\n\n${name}:\nSwap ${amountIn} ${tokenIn} for ${amountOutMin} ${tokenOut}\n\n${time}`;
+            const message = `🚨 🚨 New swap detected 🚨 🚨\n\n${name}:\nSwap ${amountIn} ${tokenIn} for\n${amountOutMin} ${tokenOut}\n\n${name} assets:\n  ${balanceToken1} ${nameToken1}\n  ${balanceToken2} ${nameToken2}\n\n${time}`;
             console.log(message);
             bot.sendMessage(id_chat, message);
         } );
