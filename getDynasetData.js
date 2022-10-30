@@ -153,11 +153,11 @@ const init = async() => {
         } );
     }
    
-    // getDynaData(dyn_btc_contract);
-    // getDynaData(dyn_eth_contract);
+    getDynaData(dyn_btc_contract);
+    getDynaData(dyn_eth_contract);
 
     // voir pour recup de API de 1inch && uniswap pour prix du token au moment du swap ? + essayer d'avoir le montant exact swap plutot que le minAmountIn (avec database et balance token avant / apres le swap ou alors avec une API ou quelque chose ??)
-    web3.eth.getTransaction("0xaa4d6b0f95698146051f04bd7d2ed94cdbc725e445edb3726db56379a4b87144").then(console.log); 
+    //web3.eth.getTransaction("0xaa4d6b0f95698146051f04bd7d2ed94cdbc725e445edb3726db56379a4b87144").then(console.log); 
 };
 
 init();
