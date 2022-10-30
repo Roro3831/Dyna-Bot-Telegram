@@ -136,7 +136,7 @@ const init = async() => {
     async function getDynaData(dyna) { 
         dyna.events.Swap(options)
         .on('data',async event => {
-            console.log(event);
+            // console.log(event);
             const name = await dyna.methods.name().call();
             const tokenIn = getName(event.returnValues.tokenIn);
             const tokenOut = getName(event.returnValues.tokenOut);
