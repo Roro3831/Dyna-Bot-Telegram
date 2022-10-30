@@ -7,9 +7,9 @@ const bot = new TelegramBot(token,{polling : true});
 bot.sendMessage("-1001772396973","Bot connected");
 
 
-// bot.on('message', (msg) => {
-//     var Hi = "hi ";
-//     if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
-//     bot.sendMessage(msg.chat.id,"Hello dear user");
-//     }
-//     });
+bot.on('message', (msg) => {
+    var Hi = "???";
+    if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
+    bot.sendMessage(msg.chat.id,"I am stil here !");
+    }
+    });

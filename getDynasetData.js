@@ -152,6 +152,13 @@ const init = async() => {
 
         } );
     }
+
+    bot.on('message', (msg) => {
+        var Hi = "???";
+        if (msg.text.toString().toLowerCase().indexOf(Hi) === 0) {
+        bot.sendMessage(msg.chat.id,"I am stil here !");
+        }
+        });
    
     getDynaData(dyn_btc_contract);
     getDynaData(dyn_eth_contract);
